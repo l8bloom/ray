@@ -21,10 +21,6 @@ spec:
       tolerations:
         - key: CriticalAddonsOnly
           operator: Exists
-        - key: "dedicated"
-          operator: "Equal"
-          value: "inference"
-          effect: "NoSchedule"
       containers:
         - image: rocm/k8s-device-plugin
           name: amdgpu-dp-cntr
