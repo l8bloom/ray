@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "api-server"
+version = "0.0.0"
+description = "api server for local inferences."
+requires-python = ">=3.12"
+dependencies = [
+    "uvicorn[standard]",
+    "fastapi",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+fix = true
+
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort (import sorting)
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "ipython",
+    "ruff",
+]
+
+[toolchain]
+# For Rust tooling (if using maturin, rust extensions, etc.)
+requires = ["rust>=1.78.0"]
