@@ -10,7 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "uvicorn[standard]",
     "fastapi",
-    "ray[default]==2.55.1",
+    "ray[all]==2.55.1",
 	"vllm",
 ]
 

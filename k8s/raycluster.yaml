@@ -25,10 +25,10 @@ spec:
             resources:
               limits:
                 cpu: "1"
-                memory: 3Gi
+                memory: 5Gi
               requests:
                 cpu: "1"
-                memory: 3Gi
+                memory: 5Gi
         volumes:
           - emptyDir: {}
             name: log-volume
@@ -50,14 +50,20 @@ spec:
               volumeMounts:
                 - mountPath: /tmp/ray
                   name: log-volume
+                - mountPath: /model
+                  name: qwen-model
               resources:
                 limits:
                   cpu: "8"
-                  memory: 12Gi
+                  memory: 8Gi
                   amd.com/gpu: 1
                 requests:
                   cpu: "8"
-                  memory: 12Gi
+                  memory: 8Gi
           volumes:
-            - emptyDir: {}
-              name: log-volume
+            - name: log-volume
+              emptyDir: {}
+            - name: qwen-model
+              hostPath:
+                path: "/models/models--Qwen--Qwen2.5-0.5B-Instruct"
+                type: Directory

@@ -41,6 +41,6 @@ RUN bash -c '\
 
 RUN bash -c '\
   source .venv/bin/activate \
-  && uv pip install "ray[default]==2.55.1" --upgrade'
+  && uv pip install "ray[all]==2.55.1" --upgrade'
 
 ENV PATH=".venv/bin:$PATH"
