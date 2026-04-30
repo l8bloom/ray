@@ -19,7 +19,7 @@ spec:
       spec:
         containers:
           - name: ray-head
-            image: l8bloom-frontier:5000/vllm:rocm721
+            image: l8bloom-frontier:5000/vllm:rocm7210
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /tmp/ray
@@ -47,7 +47,7 @@ spec:
         spec:
           containers:
             - name: ray-worker
-              image: l8bloom-frontier:5000/vllm:rocm721
+              image: l8bloom-frontier:5000/vllm:rocm7210
               imagePullPolicy: IfNotPresent
               volumeMounts:
                 - mountPath: /tmp/ray
