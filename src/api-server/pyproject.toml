@@ -10,7 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "uvicorn[standard]",
     "fastapi",
-    "ray[default]",
+    "ray[default]==2.55.1",
 ]
 
 [tool.ruff]
@@ -37,5 +37,4 @@ dev = [
 ]
 
 [toolchain]
-# For Rust tooling (if using maturin, rust extensions, etc.)
 requires = ["rust>=1.78.0"]

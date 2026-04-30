@@ -38,4 +38,6 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/bin sh
 RUN bash -c '\
   uv venv --python 3.12 --seed \
   && source .venv/bin/activate \
-  && uv pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
+  && uv pip install vllm "ray[default]==2.55.1" --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
+
+ENV PATH=".venv/bin:$PATH"

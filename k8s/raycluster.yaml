@@ -5,14 +5,17 @@ metadata:
   name: raycluster-kuberay
   namespace: default
   labels:
-    helm.sh/chart: ray-cluster-1.6.0
+    helm.sh/chart: ray-cluster-1.6.1
 spec:
+  rayVersion: "2.55.1"
   headGroupSpec:
+    rayStartParams:
+      dashboard-host: "0.0.0.0"
     serviceType: ClusterIP
     template:
       metadata:
         labels:
-          helm.sh/chart: ray-cluster-1.6.0
+          helm.sh/chart: ray-cluster-1.6.1
       spec:
         containers:
           - name: ray-head
@@ -40,7 +43,7 @@ spec:
       template:
         metadata:
           labels:
-            helm.sh/chart: ray-cluster-1.6.0
+            helm.sh/chart: ray-cluster-1.6.1
         spec:
           containers:
             - name: ray-worker
