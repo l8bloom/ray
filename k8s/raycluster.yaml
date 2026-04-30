@@ -9,8 +9,6 @@ metadata:
 spec:
   rayVersion: "2.55.1"
   headGroupSpec:
-    rayStartParams:
-      dashboard-host: "0.0.0.0"
     serviceType: ClusterIP
     template:
       metadata:
@@ -19,7 +17,7 @@ spec:
       spec:
         containers:
           - name: ray-head
-            image: l8bloom-frontier:5000/vllm:rocm7210
+            image: l8bloom-frontier:5000/ray:0.0.0
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /tmp/ray
@@ -27,10 +25,10 @@ spec:
             resources:
               limits:
                 cpu: "1"
-                memory: 5Gi
+                memory: 3Gi
               requests:
                 cpu: "1"
-                memory: 5Gi
+                memory: 3Gi
         volumes:
           - emptyDir: {}
             name: log-volume
@@ -47,19 +45,19 @@ spec:
         spec:
           containers:
             - name: ray-worker
-              image: l8bloom-frontier:5000/vllm:rocm7210
+              image: l8bloom-frontier:5000/ray:0.0.0
               imagePullPolicy: IfNotPresent
               volumeMounts:
                 - mountPath: /tmp/ray
                   name: log-volume
               resources:
                 limits:
-                  cpu: "1"
-                  memory: 1Gi
+                  cpu: "8"
+                  memory: 12Gi
                   amd.com/gpu: 1
                 requests:
-                  cpu: "1"
-                  memory: 1Gi
+                  cpu: "8"
+                  memory: 12Gi
           volumes:
             - emptyDir: {}
               name: log-volume

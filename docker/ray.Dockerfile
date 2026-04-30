@@ -29,15 +29,18 @@ RUN apt update \
     libxkbcommon0 \
     libxkbcommon-x11-0
 
-ENV HIP_VISIBLE_DEVICES="0"
-
 # uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/bin sh
 
-# # https://docs.vllm.ai/en/latest/getting_started/installation/gpu/index.html#create-a-new-python-environment
+# https://docs.vllm.ai/en/latest/getting_started/installation/gpu/index.html
+# vllm is heavy, isolate it
 RUN bash -c '\
   uv venv --python 3.12 --seed \
   && source .venv/bin/activate \
-  && uv pip install vllm "ray[default]==2.55.1" --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
+  && uv pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
+
+RUN bash -c '\
+  source .venv/bin/activate \
+  && uv pip install "ray[default]==2.55.1" --upgrade'
 
 ENV PATH=".venv/bin:$PATH"

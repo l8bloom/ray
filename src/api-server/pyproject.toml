@@ -11,6 +11,7 @@ dependencies = [
     "uvicorn[standard]",
     "fastapi",
     "ray[default]==2.55.1",
+	"vllm",
 ]
 
 [tool.ruff]
