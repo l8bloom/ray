@@ -1,0 +1,61 @@
+# Source: ray-cluster/templates/raycluster-cluster.yaml
+apiVersion: ray.io/v1
+kind: RayCluster
+metadata:
+  name: raycluster-kuberay
+  namespace: default
+  labels:
+    helm.sh/chart: ray-cluster-1.6.0
+spec:
+  headGroupSpec:
+    serviceType: ClusterIP
+    template:
+      metadata:
+        labels:
+          helm.sh/chart: ray-cluster-1.6.0
+      spec:
+        containers:
+          - name: ray-head
+            image: l8bloom-frontier:5000/vllm:rocm721
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+              - mountPath: /tmp/ray
+                name: log-volume
+            resources:
+              limits:
+                cpu: "1"
+                memory: 5Gi
+              requests:
+                cpu: "1"
+                memory: 5Gi
+        volumes:
+          - emptyDir: {}
+            name: log-volume
+  workerGroupSpecs:
+    - groupName: workergroup
+      replicas: 1
+      minReplicas: 1
+      maxReplicas: 1
+      numOfHosts: 1
+      template:
+        metadata:
+          labels:
+            helm.sh/chart: ray-cluster-1.6.0
+        spec:
+          containers:
+            - name: ray-worker
+              image: l8bloom-frontier:5000/vllm:rocm721
+              imagePullPolicy: IfNotPresent
+              volumeMounts:
+                - mountPath: /tmp/ray
+                  name: log-volume
+              resources:
+                limits:
+                  cpu: "1"
+                  memory: 1Gi
+                requests:
+                  cpu: "1"
+                  memory: 1Gi
+          volumes:
+            - emptyDir: {}
+              name: log-volume
