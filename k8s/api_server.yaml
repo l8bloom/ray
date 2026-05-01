@@ -17,6 +17,21 @@ spec:
       containers:
         - image: l8bloom-frontier:5000/api_server:0.0.2
           name: api-server
+          env:
+            - name: RAY_HEAD_SVC
+              value: "raycluster-kuberay-head-svc"
+            - name: RAY_HEAD_SVC_PORT
+              value: "10001"
+            - name: RAY_GPUS_CNT
+              value: "1"
+            - name: RAY_NAMESPACE
+              value: "vllm-qwen"
+            - name: RAY_ACTOR_BASENAME
+              value: "qwen"
+            - name: QWEN_PATH
+              value: "/model/snapshots/7ae557604adf67be50417f59c2c2f167def9a775"
+            - name: X_API_KEY
+              value: "abc"
           ports:
             - containerPort: 8000
               name: server-port
