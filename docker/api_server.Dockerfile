@@ -19,7 +19,6 @@ RUN bash -c '\
 
 ENV PATH=".venv/bin:$PATH"
 
-RUN chown -R nobody:nogroup .
 USER nobody:nogroup
 
 ARG uvicorn_port="8000"
