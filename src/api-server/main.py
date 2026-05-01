@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.routing import JSONResponse
 
-app = FastAPI()
+from api_server.app_lifespan import lifespan
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/health")
