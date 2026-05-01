@@ -35,7 +35,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/bin sh
 # https://docs.vllm.ai/en/latest/getting_started/installation/gpu/index.html
 # vllm is heavy, isolate it
 RUN bash -c '\
-  uv venv --python 3.12 --seed \
+  uv venv --python 3.12 --seed --managed-python \
   && source .venv/bin/activate \
   && uv pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
 

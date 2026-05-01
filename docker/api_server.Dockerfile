@@ -7,7 +7,7 @@ WORKDIR /nowhere
 
 # install vllm so imports work, no inference happens here
 RUN bash -c '\
-  uv venv --python 3.12 --seed \
+  uv venv --python 3.12 --seed --managed-python \
   && source .venv/bin/activate \
   && uv pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
 
