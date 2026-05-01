@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: api-server
+  name: api-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-server
+  template:
+    metadata:
+      labels:
+        app: api-server
+    spec:
+      containers:
+        - image: l8bloom-frontier:5000/api_server:0.0.5
+          name: api-server
+          env:
+            - name: RAY_HEAD_SVC
+              value: "raycluster-kuberay-head-svc"
+            - name: RAY_HEAD_SVC_PORT
+              value: "10001"
+            - name: RAY_GPUS_CNT
+              value: "1"
+            - name: RAY_NAMESPACE
+              value: "vllm-qwen"
+            - name: RAY_ACTOR_BASENAME
+              value: "qwen"
+            - name: QWEN_PATH
+              value: "/model/snapshots/7ae557604adf67be50417f59c2c2f167def9a775"
+            - name: X_API_KEY
+              value: "abc"
+          ports:
+            - containerPort: 8000
+              name: server-port
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: "/ready"
+              port: server-port
+            # try with 60 sec
+            failureThreshold: 30
+            periodSeconds: 2
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: "/health"
+              port: server-port
+          readinessProbe:
+            httpGet:
+              path: "/ready"
+              port: server-port
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi

@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# ROCm installation
+# https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html
 RUN \
     apt update && \
     apt install -y wget && \

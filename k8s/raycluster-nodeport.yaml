@@ -1,0 +1,15 @@
+# not strictly required; only for ease of development
+apiVersion: v1
+kind: Service
+metadata:
+  name: ray-client-nodeport
+spec:
+  type: NodePort
+  selector:
+    ray.io/cluster: raycluster-kuberay
+    ray.io/node-type: head
+  ports:
+    - name: client
+      port: 10001
+      targetPort: 10001
+      nodePort: 31001 # keep it fixed

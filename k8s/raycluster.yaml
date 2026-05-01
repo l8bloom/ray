@@ -9,8 +9,6 @@ metadata:
 spec:
   rayVersion: "2.55.1"
   headGroupSpec:
-    rayStartParams:
-      dashboard-host: "0.0.0.0"
     serviceType: ClusterIP
     template:
       metadata:
@@ -19,17 +17,17 @@ spec:
       spec:
         containers:
           - name: ray-head
-            image: l8bloom-frontier:5000/vllm:rocm7210
+            image: l8bloom-frontier:5000/ray:0.0.1
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /tmp/ray
                 name: log-volume
             resources:
               limits:
-                cpu: "1"
-                memory: 5Gi
+                cpu: "2"
+                memory: 10Gi
               requests:
-                cpu: "1"
+                cpu: "2"
                 memory: 5Gi
         volumes:
           - emptyDir: {}
@@ -47,19 +45,25 @@ spec:
         spec:
           containers:
             - name: ray-worker
-              image: l8bloom-frontier:5000/vllm:rocm7210
+              image: l8bloom-frontier:5000/ray:0.0.1
               imagePullPolicy: IfNotPresent
               volumeMounts:
                 - mountPath: /tmp/ray
                   name: log-volume
+                - mountPath: /model
+                  name: qwen-model
               resources:
                 limits:
-                  cpu: "1"
-                  memory: 1Gi
+                  cpu: "8"
+                  memory: 8Gi
                   amd.com/gpu: 1
                 requests:
-                  cpu: "1"
-                  memory: 1Gi
+                  cpu: "8"
+                  memory: 8Gi
           volumes:
-            - emptyDir: {}
-              name: log-volume
+            - name: log-volume
+              emptyDir: {}
+            - name: qwen-model
+              hostPath:
+                path: "/models/models--Qwen--Qwen2.5-0.5B-Instruct"
+                type: Directory
