@@ -23,7 +23,10 @@ async def health_check():
 async def ready_check(ready: Annotated[bool, Depends(is_app_ready)]):
     if ready:
         return JSONResponse(content={"status": "ready"})
-    return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE)
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"status": "not ready"},
+    )
 
 
 @app.post("/v1/batches")

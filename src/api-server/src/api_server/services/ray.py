@@ -1,5 +1,6 @@
 """Ray API"""
 
+import asyncio
 import logging
 from functools import lru_cache
 
@@ -22,7 +23,20 @@ runtime_env = {
 }
 
 
-LLMActor = ray.remote(LLM)
+@ray.remote
+class LLMActor:
+    """A thin wrapper around vllm LLM.
+
+    Used for readiness checks.
+    """
+
+    def __init__(self, model_path: str):
+        self._ready = False
+        self.llm = LLM(model=model_path)
+        self._ready = True
+
+    def is_ready(self) -> bool:
+        return self._ready
 
 
 def _init_ray():
@@ -57,7 +71,7 @@ def _create_ray_actors():
     return actors
 
 
-ACTOR_POOL_INITIALIZED = False
+ACTORS = None
 
 
 @lru_cache(maxsize=1)
@@ -68,14 +82,27 @@ def get_ray_actors_pool() -> ActorPool:
     Actors are detached so only non-existing actors are created.
     """
     _init_ray()
-    pool = ActorPool(_create_ray_actors())
+    actors = _create_ray_actors()
+    pool = ActorPool(actors)
 
-    global ACTOR_POOL_INITIALIZED
-    ACTOR_POOL_INITIALIZED = True
+    global ACTORS
+    ACTORS = actors
 
     return pool
 
 
-def is_pool_ready() -> bool:
-    """True if ray worker pool has been initialized, False otherwise."""
-    return ACTOR_POOL_INITIALIZED
+async def is_pool_ready() -> bool:
+    if not ACTORS:
+        return False
+
+    try:
+        actor_handle = ACTORS[0]
+
+        ready_ref = actor_handle.is_ready.remote()
+        result = await asyncio.wait_for(ready_ref, timeout=1.0)
+
+        return result
+
+    except (TimeoutError, Exception) as e:
+        logger.debug(f"Readiness check heartbeat failed: {e}")
+        return False

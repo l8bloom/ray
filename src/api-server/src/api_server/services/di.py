@@ -16,8 +16,8 @@ def ray_actors_pool() -> ActorPool:
     return get_ray_actors_pool()
 
 
-def is_app_ready() -> bool:
-    return is_pool_ready()
+async def is_app_ready() -> bool:
+    return await is_pool_ready()
 
 
 api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
