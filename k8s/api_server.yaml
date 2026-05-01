@@ -19,12 +19,12 @@ spec:
           name: api-server
           ports:
             - containerPort: 8000
-              name: serverPort
+              name: server-port
               protocol: TCP
           startupProbe:
             httpGet:
               path: "/ready"
-              port: serverPort
+              port: server-port
             # try with 60 sec
             failureThreshold: 30
             periodSeconds: 2
@@ -32,11 +32,11 @@ spec:
           livenessProbe:
             httpGet:
               path: "/health"
-              port: serverPort
+              port: server-port
           readinessProbe:
             httpGet:
               path: "/ready"
-              port: serverPort
+              port: server-port
           resources:
             limits:
               cpu: "2"
