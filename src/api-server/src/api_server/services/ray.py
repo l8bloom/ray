@@ -21,16 +21,18 @@ runtime_env = {
     }
 }
 
-logger.info("Connecting to Ray cluster...")
-ray.init(
-    address=f"ray://{_env.RAY_HEAD_SVC}:{_env.RAY_HEAD_SVC_PORT}",
-    namespace=_env.RAY_NAMESPACE,
-    runtime_env=runtime_env,
-)
-logger.info("Connected to Ray cluster.")
-
 
 LLMActor = ray.remote(LLM)
+
+
+def _init_ray():
+    logger.info("Connecting to Ray cluster...")
+    ray.init(
+        address=f"ray://{_env.RAY_HEAD_SVC}:{_env.RAY_HEAD_SVC_PORT}",
+        namespace=_env.RAY_NAMESPACE,
+        runtime_env=runtime_env,
+    )
+    logger.info("Connected to Ray cluster.")
 
 
 def _create_ray_actor(name: str, namespace: str):
@@ -38,7 +40,7 @@ def _create_ray_actor(name: str, namespace: str):
         name=name,
         lifetime="detached",
         get_if_exists=True,
-        # hardcoded atm
+        # hardcoded for Qwen model
         num_gpus=1,
         num_cpus=4,
     ).remote(_env.QWEN_PATH)
@@ -55,11 +57,25 @@ def _create_ray_actors():
     return actors
 
 
+ACTOR_POOL_INITIALIZED = False
+
+
 @lru_cache(maxsize=1)
-def get_ray_actors_pool():
+def get_ray_actors_pool() -> ActorPool:
     """Creates pool of Ray actors.
 
     Pool does the load balancing between the actors.
-    Actors are detached so only non-existend actors are created.
+    Actors are detached so only non-existing actors are created.
     """
-    return ActorPool(_create_ray_actors())
+    _init_ray()
+    pool = ActorPool(_create_ray_actors())
+
+    global ACTOR_POOL_INITIALIZED
+    ACTOR_POOL_INITIALIZED = True
+
+    return pool
+
+
+def is_pool_ready() -> bool:
+    """True if ray worker pool has been initialized, False otherwise."""
+    return ACTOR_POOL_INITIALIZED

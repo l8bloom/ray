@@ -18,6 +18,7 @@ class ReqEnvVars(StrEnum):
     RAY_HEAD_SVC = "RAY_HEAD_SVC"
     RAY_HEAD_SVC_PORT = "RAY_HEAD_SVC_PORT"
     RAY_GPUS_CNT = "RAY_GPUS_CNT"
+    X_API_KEY = "X_API_KEY"
 
 
 class OptEnvVars(StrEnum):
@@ -39,6 +40,7 @@ class AppEnv(BaseModel):
     RAY_NAMESPACE: str = "vllm-qwen"
     RAY_ACTOR_BASENAME: str = "qwen"
     QWEN_PATH: str = "/model/snapshots/7ae557604adf67be50417f59c2c2f167def9a775"
+    X_API_KEY: str = "abc"
 
     @classmethod
     def parse_env(cls):
