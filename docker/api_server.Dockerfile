@@ -19,9 +19,7 @@ RUN bash -c '\
 
 ENV PATH=".venv/bin:$PATH"
 
-USER nobody:nogroup
-
 ARG uvicorn_port="8000"
 ENV UVICORN_PORT="${uvicorn_port}"
 
-ENTRYPOINT ["/bin/sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${UVICORN_PORT}"]
+ENTRYPOINT ["/bin/sh", "-c", "exec uvicorn main:app --host 0.0.0.0 --port ${UVICORN_PORT} --log-config log_conf.yaml"]
