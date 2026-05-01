@@ -1,0 +1,18 @@
+# for convenience
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: api-server
+  name: api-server
+spec:
+  ports:
+    - port: 8000
+      protocol: TCP
+      targetPort: 8000
+      nodePort: 31313 # keep it fixed
+  selector:
+    app: api-server
+  type: NodePort
+status:
+  loadBalancer: {}
