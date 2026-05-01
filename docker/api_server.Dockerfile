@@ -1,4 +1,10 @@
-FROM python:3.12
+FROM ubuntu:24.04
+
+RUN apt update \
+    && apt install -y wget \
+    nano \
+    curl
+
 
 # install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR=/usr/bin sh
@@ -10,6 +16,15 @@ RUN bash -c '\
   uv venv --python 3.12 --seed --managed-python \
   && source .venv/bin/activate \
   && uv pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
+
+# install utilities and wayland libs
+RUN apt update \
+    && apt install -y wget \
+    nano \
+    curl \
+	libopenmpi3 \
+	libopenmpi-dev \
+	openmpi-bin
 
 COPY . .
 
