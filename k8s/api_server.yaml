@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: api-server
+  name: api-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-server
+  template:
+    metadata:
+      labels:
+        app: api-server
+    spec:
+      containers:
+        - image: l8bloom-frontier:5000/api_server:0.0.2
+          name: api-server
+          ports:
+            - containerPort: 8000
+              name: serverPort
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: "/ready"
+              port: serverPort
+            # try with 60 sec
+            failureThreshold: 30
+            periodSeconds: 2
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: "/health"
+              port: serverPort
+          readinessProbe:
+            httpGet:
+              path: "/ready"
+              port: serverPort
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi

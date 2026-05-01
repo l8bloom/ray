@@ -104,5 +104,5 @@ async def is_pool_ready() -> bool:
         return result
 
     except (TimeoutError, Exception) as e:
-        logger.debug(f"Readiness check heartbeat failed: {e}")
+        logger.debug(f"Readiness check failed: {e}")
         return False
