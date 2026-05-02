@@ -39,8 +39,12 @@ RUN bash -c '\
   && source .venv/bin/activate \
   && uv pip install vllm --extra-index-url https://wheels.vllm.ai/rocm/ --upgrade'
 
+# install environment the driver defines so imports work
+
+COPY . .
+
 RUN bash -c '\
   source .venv/bin/activate \
-  && uv pip install "ray[all]==2.55.1" --upgrade'
+  && uv pip install --no-cache-dir .'
 
 ENV PATH=".venv/bin:$PATH"

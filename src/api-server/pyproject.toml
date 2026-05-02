@@ -12,13 +12,15 @@ dependencies = [
     "fastapi",
     "ray[all]==2.55.1",
 	"vllm",
+    "sqlalchemy",
+    "alembic",
+    "psycopg[binary, pool]",
 ]
 
 [tool.ruff]
 line-length = 88
 target-version = "py312"
 fix = true
-
 
 [tool.ruff.lint]
 select = [
@@ -29,7 +31,6 @@ select = [
     "B",    # flake8-bugbear
     "UP",   # pyupgrade
 ]
-
 
 [project.optional-dependencies]
 dev = [

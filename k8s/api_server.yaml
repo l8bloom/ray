@@ -15,7 +15,7 @@ spec:
         app: api-server
     spec:
       containers:
-        - image: l8bloom-frontier:5000/api_server:0.0.5
+        - image: l8bloom-frontier:5000/api_server:0.0.11
           name: api-server
           env:
             - name: RAY_HEAD_SVC
@@ -32,6 +32,16 @@ spec:
               value: "/model/snapshots/7ae557604adf67be50417f59c2c2f167def9a775"
             - name: X_API_KEY
               value: "abc"
+            - name: PG_HOST
+              value: "postgres-service"
+            - name: PG_PORT
+              value: "7777"
+            - name: PG_USER
+              value: "postgres"
+            - name: PG_PASSWORD
+              value: "postgres"
+            - name: PG_DATABASE
+              value: "qwen"
           ports:
             - containerPort: 8000
               name: server-port
@@ -40,8 +50,8 @@ spec:
             httpGet:
               path: "/ready"
               port: server-port
-            # try with 60 sec
-            failureThreshold: 30
+            # try with 120 sec
+            failureThreshold: 60
             periodSeconds: 2
             timeoutSeconds: 2
           livenessProbe:

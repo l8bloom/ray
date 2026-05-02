@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres-nodes
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+      # requires: https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.34/deploy/local-path-storage.yaml
+  volumeClaimTemplates: # This creates a PVC for every pod automatically
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: "local-path"
+        resources:
+          requests:
+            storage: 100Gi
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: qwen-database
+          image: l8bloom-frontier:5000/postgres:18
+          ports:
+            - name: pg-port
+              containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: postgres
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql
+          resources:
+            requests:
+              cpu: 500m
+              memory: 256Mi
+            limits:
+              cpu: 8
+              memory: 8Gi
+          livenessProbe:
+            exec:
+              command: ["pg_isready"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command: ["pg_isready"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
