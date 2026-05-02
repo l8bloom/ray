@@ -2,7 +2,7 @@
 
 # call this from directory representing required context
 # e.g. (pwd=...ray/src/api-server) build.sh server ../../docker/server.Dockerfile
-# e.g. (pwd=...ray/docker) build.sh ray ray.Dockerfile
+# e.g. (pwd=...ray/src/api-server) build.sh ray ../../docker/ray.Dockerfile
 
 set -euo pipefail
 
@@ -27,7 +27,7 @@ build_and_push() {
 
 	case "$mode" in
 		ray)
-			image_tag="ray:0.0.1"
+			image_tag="ray:0.0.2"
 			;;
 		server)
 			image_tag="api_server:0.0.5"

@@ -29,18 +29,34 @@ class OptEnvVars(StrEnum):
     RAY_ACTOR_BASENAME = "RAY_ACTOR_BASENAME"
     QWEN_PATH = "QWEN_PATH"
 
+    PG_USER = "PG_USER"
+    PG_PASSWORD = "PG_PASSWORD"
+    PG_HOST = "PG_HOST"
+    PG_PORT = "PG_PORT"
+    PG_DATABASE = "PG_DATABASE"
+
 
 class AppEnv(BaseModel):
     """Represents environment the app was set into."""
 
     APP_ENV: AppEnvEnum = AppEnvEnum.DEV
+
     RAY_HEAD_SVC: str
     RAY_HEAD_SVC_PORT: int
     RAY_GPUS_CNT: int
     RAY_NAMESPACE: str = "vllm-qwen"
     RAY_ACTOR_BASENAME: str = "qwen"
+
     QWEN_PATH: str = "/model/snapshots/7ae557604adf67be50417f59c2c2f167def9a775"
+
     X_API_KEY: str = "abc"
+
+    PG_USER: str = "postgres"
+    PG_PASSWORD: str = "postgres"
+    PG_HOST: str = "localhost"
+    PG_PORT: int = 7777
+    PG_DATABASE: str = "qwen"
+    PG_DRIVER_NAME: str = "postgresql+psycopg"
 
     @classmethod
     def parse_env(cls):
