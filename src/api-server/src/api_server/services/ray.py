@@ -165,4 +165,5 @@ async def are_actors_ready() -> bool:
 
 
 def get_queue() -> Queue:
+    global QUEUE
     return QUEUE
