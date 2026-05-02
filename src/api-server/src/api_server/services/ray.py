@@ -47,7 +47,6 @@ class LLMActor:
         self.queue = queue
         self.llm = LLM(model=model_path)
         self.db = get_db(get_env())
-        self.say_ready()
 
     def run(self):
         """Beginning and end of the actor's lifetime."""
@@ -155,7 +154,7 @@ async def are_actors_ready() -> bool:
         return False
 
     try:
-        ping_refs = [actor.ping.remote() for actor in ACTORS]
+        ping_refs = [actor.say_ready.remote() for actor in ACTORS]
         ready, not_ready = ray.wait(ping_refs, num_returns=len(ACTORS), timeout=2.0)
 
         return len(ready) == _env.RAY_GPUS_CNT
