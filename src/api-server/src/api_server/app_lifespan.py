@@ -6,7 +6,7 @@ from api_server.services.di import ray_actors_pool
 
 
 def lifespan(app: FastAPI):
-    # just call it, references are cached
+    # trigger actors creation if not created already, references are cached
     ray_actors_pool()
 
     yield

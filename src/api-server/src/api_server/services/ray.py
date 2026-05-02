@@ -35,6 +35,19 @@ class LLMActor:
         self.llm = LLM(model=model_path)
         self._ready = True
 
+    def batch_generate(self, prompts: list[str], max_tokens: int):
+        """Batch inference."""
+
+        params = self.llm.get_default_sampling_params()
+        # override max tokens and keep the defaults
+        # ideally the entire sampler params will be the arg, not only tokens
+        # but out of scope
+        params.max_tokens = max_tokens
+        outputs = self.llm.generate(prompts, params)
+
+        # TODO: save here in the database
+        return outputs
+
     def is_ready(self) -> bool:
         return self._ready
 

@@ -8,7 +8,7 @@ from api_server.services.ray import get_ray_actors_pool, is_pool_ready
 from .env import AppEnv, get_env
 
 
-def env() -> AppEnv:
+async def env() -> AppEnv:
     return get_env()
 
 
