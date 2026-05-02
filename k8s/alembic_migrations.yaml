@@ -11,7 +11,7 @@ spec:
         - name: alembic-migrations
           image: l8bloom-frontier:5000/api_server:0.0.6
           imagePullPolicy: IfNotPresent
-          command: ["alembic"]
+          command: [".venv/bin/alembic"]
           args: ["-c", "src/alembic.ini", "upgrade", "head"]
           env:
             - name: PG_HOST
