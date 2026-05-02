@@ -49,10 +49,10 @@ class LLMActor:
         self.db = get_db(get_env())
         self.say_ready()
 
-    def run(self, queue: Queue):
+    def run(self):
         """Beginning and end of the actor's lifetime."""
         while True:
-            prompts, max_tokens, job_id = queue.get()  # just block
+            prompts, max_tokens, job_id = self.queue.get()  # just block
             self.batch_generate(prompts, max_tokens, job_id)
 
     def batch_generate(self, prompts: list[str], max_tokens: int, job_id: uuid.UUID):
@@ -70,8 +70,8 @@ class LLMActor:
         # TODO: save here in the database
 
     def say_ready(self) -> bool:
-        """Update the queue indicating to the cluster this actor is ready."""
-        self.queue.put_nowait(True)
+        """Indicate to the cluster this actor is ready."""
+        return True
 
 
 def _init_ray():
@@ -92,6 +92,7 @@ def _create_ray_actor(name: str, namespace: str, queue: Queue):
         # hardcoded for Qwen model
         num_gpus=1,
         num_cpus=4,
+        max_concurrency=2,  # for readiness, run() hogs the entire thread
     ).remote(_env.QWEN_PATH, queue)
 
     return llm_handle
@@ -139,20 +140,13 @@ def create_actors():
         queue_handle = Queue(actor_options={"name": queue_name, "lifetime": "detached"})
         actors = _create_ray_actors(queue_handle)
 
-    # mark actors ready
-    for actor in actors:
-        actor.say_ready.remote()
-
     # start gpu actors loop
     for actor in actors:
-        actor.run.remote(queue_handle)
+        actor.run.remote()
 
     global QUEUE, ACTORS
     ACTORS = actors
     QUEUE = queue_handle
-
-
-QUEUE_READINESS = []
 
 
 async def are_actors_ready() -> bool:
@@ -161,10 +155,12 @@ async def are_actors_ready() -> bool:
         return False
 
     try:
-        item = QUEUE.get(timeout=1.0)
-        QUEUE_READINESS.append(item)
-        return len(QUEUE_READINESS) == _env.RAY_GPUS_CNT
-    except (TimeoutError, Exception) as e:
+        ping_refs = [actor.ping.remote() for actor in ACTORS]
+        ready, not_ready = ray.wait(ping_refs, num_returns=len(ACTORS), timeout=2.0)
+
+        return len(ready) == _env.RAY_GPUS_CNT
+
+    except Exception as e:
         logger.debug(f"Readiness check failed: {e}")
         return False
 
