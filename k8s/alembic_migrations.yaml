@@ -12,7 +12,7 @@ spec:
           image: l8bloom-frontier:5000/api_server:0.0.6
           imagePullPolicy: IfNotPresent
           command: ["alembic"]
-          args: ["upgrade", "head"]
+          args: ["-c", "src/alembic.ini", "upgrade", "head"]
           env:
             - name: PG_HOST
               value: "postgres-service"
@@ -24,3 +24,12 @@ spec:
               value: "postgres"
             - name: PG_DATABASE
               value: "qwen"
+            # just to satisfy env parsers
+            - name: RAY_HEAD_SVC
+              value: "a"
+            - name: RAY_HEAD_SVC_PORT
+              value: "a"
+            - name: RAY_GPUS_CNT
+              value: "a"
+            - name: X_API_KEY
+              value: "a"
