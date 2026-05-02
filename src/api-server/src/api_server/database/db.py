@@ -4,9 +4,11 @@ from sqlalchemy.orm import sessionmaker
 
 from api_server.services.env import AppEnv
 
+from .orm_models import Batch as BatchORM
+
 
 class DatabaseConfig(BaseModel):
-    """Configuration for a database setup, with a set of default values"""
+    """Configuration for a database setup."""
 
     DATABASE_USER: str
     DATABASE_PASSWORD: str
@@ -37,7 +39,7 @@ class Database:
         return sessionmaker(bind=self.engine)
 
     @classmethod
-    def create(cls, db_cfg: DatabaseConfig | None = None) -> "Database":
+    def create(cls, db_cfg: DatabaseConfig) -> "Database":
         """Creates new instance of Database if not created already."""
         db_cfg = db_cfg
         conn_info = cls.db_conn_info(db_cfg).render_as_string()
@@ -60,6 +62,11 @@ class Database:
             port=db_cfg.DATABASE_PORT,
             database=db_cfg.DATABASE_NAME,
         )
+
+    def create_new_batch(self, batch: BatchORM):
+        """Records new batch job and its prompts."""
+
+        BatchORM()
 
 
 def get_db(env: AppEnv) -> Database:
