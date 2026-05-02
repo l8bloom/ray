@@ -9,7 +9,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: alembic-migrations
-          image: l8bloom-frontier:5000/api_server:0.0.5
+          image: l8bloom-frontier:5000/api_server:0.0.6
           imagePullPolicy: IfNotPresent
           command: ["alembic"]
           args: ["upgrade", "head"]
