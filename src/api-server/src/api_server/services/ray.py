@@ -99,7 +99,11 @@ def _create_ray_actor(name: str, namespace: str, queue: Queue):
 
 def _create_ray_actors(queue: Queue):
     actors = [
-        _create_ray_actor(f"{_env.RAY_ACTOR_BASENAME}_{i + 1}", _env.RAY_NAMESPACE)
+        _create_ray_actor(
+            f"{_env.RAY_ACTOR_BASENAME}_{i + 1}",
+            _env.RAY_NAMESPACE,
+            queue,
+        )
         for i in range(_env.RAY_GPUS_CNT)
     ]
 
