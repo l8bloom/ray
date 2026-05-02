@@ -13,7 +13,7 @@ class BatchPrompt(BaseModel):
             min_length=1,
             max_length=1_000_000,
             description="AI Prompt",
-            examples=["What is 2+2?"],
+            examples=["What is 2+2?", "Hello world"],
         ),
     ]
 
@@ -38,7 +38,7 @@ class Batch(BaseModel):
             gt=0,
             lt=1_000_000,
             description="How many output tokens can be generated for each prompt.",
-            examples=[100],
+            examples=[50],
         ),
     ]
 

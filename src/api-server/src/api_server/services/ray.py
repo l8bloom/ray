@@ -2,10 +2,10 @@
 
 import asyncio
 import logging
-from functools import lru_cache
+import uuid
 
 import ray
-from ray.util.actor_pool import ActorPool
+from ray.util.queue import Queue
 from vllm import LLM
 
 from api_server.database.db import get_db
@@ -21,10 +21,15 @@ runtime_env = {
     "env_vars": {
         "PG_USER": _env.PG_USER,
         "PG_PASSWORD": _env.PG_PASSWORD,
-        "PG_HOST": _env.PG_HOST,
+        "PG_HOST": "postgres-service",
         "PG_PORT": str(_env.PG_PORT),
         "PG_DATABASE": _env.PG_DATABASE,
         "PG_DRIVER_NAME": _env.PG_DRIVER_NAME,
+        # satisfy env parser for ray worker - hacking
+        "RAY_HEAD_SVC": "",
+        "RAY_HEAD_SVC_PORT": "0",
+        "RAY_GPUS_CNT": "0",
+        "X_API_KEY": "",
         # for some reason ray images use default python installation
         # even though PATH was extended with venv python
         "PATH": "/.venv/bin:${PATH}",
@@ -45,7 +50,13 @@ class LLMActor:
         self.db = get_db(get_env())
         self._ready = True
 
-    def batch_generate(self, prompts: list[str], max_tokens: int):
+    def run(self, queue: Queue):
+        """Beginning and end of the actor's lifetime."""
+        while True:
+            prompts, max_tokens, job_id = queue.get()  # just block
+            self.batch_generate(prompts, max_tokens, job_id)
+
+    def batch_generate(self, prompts: list[str], max_tokens: int, job_id: uuid.UUID):
         """Batch inference."""
 
         params = self.llm.get_default_sampling_params()
@@ -53,10 +64,11 @@ class LLMActor:
         # ideally the entire sampler params will be the arg, not only tokens
         # but out of scope
         params.max_tokens = max_tokens
+        print(f"JOB ID: {job_id}")
         outputs = self.llm.generate(prompts, params)
+        print(outputs)
 
         # TODO: save here in the database
-        return outputs
 
     def is_ready(self) -> bool:
         return self._ready
@@ -94,27 +106,46 @@ def _create_ray_actors():
     return actors
 
 
+def _get_ray_actors():
+    actors = [
+        ray.get_actor(
+            name=f"{_env.RAY_ACTOR_BASENAME}_{i + 1}",
+            namespace=_env.RAY_NAMESPACE,
+        )
+        for i in range(_env.RAY_GPUS_CNT)
+    ]
+
+    return actors
+
+
 ACTORS = None
+QUEUE = None
 
 
-@lru_cache(maxsize=1)
-def get_ray_actors_pool() -> ActorPool:
-    """Creates pool of Ray actors.
+def create_actors():
+    """Create GPU workers and the QueueActor if not found in the Ray cluster."""
 
-    Pool does the load balancing between the actors.
-    Actors are detached so only non-existing actors are created.
-    """
     _init_ray()
-    actors = _create_ray_actors()
-    pool = ActorPool(actors)
+    queue_name = "queue"
+    try:
+        queue_handle = ray.get_actor(name=queue_name, namespace=_env.RAY_NAMESPACE)
+        actors = _get_ray_actors()
+    except ValueError:
+        # create actors
+        queue_handle = Queue(actor_options={"name": queue_name, "lifetime": "detached"})
+        actors = _create_ray_actors()
 
-    global ACTORS
+    # start gpu actors loop
+    for actor in actors:
+        actor.run.remote(queue_handle)
+
+    global QUEUE, ACTORS
     ACTORS = actors
+    QUEUE = queue_handle
 
-    return pool
 
-
-async def is_pool_ready() -> bool:
+async def are_actors_ready() -> bool:
+    """Returns True if Ray initialized the workers."""
     if not ACTORS:
         return False
 
@@ -129,3 +160,7 @@ async def is_pool_ready() -> bool:
     except (TimeoutError, Exception) as e:
         logger.debug(f"Readiness check failed: {e}")
         return False
+
+
+def get_queue() -> Queue:
+    return QUEUE
