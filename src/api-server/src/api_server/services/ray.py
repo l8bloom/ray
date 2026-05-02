@@ -138,17 +138,18 @@ def create_actors():
     queue_name = "queue"
     try:
         actors = _get_ray_actors()
-        queue_handle = ray.get(actors[0].get_queue.remote())
         logger.debug("Found existing actors")
+        queue_handle = ray.get(actors[0].get_queue.remote(), timeout=10.0)
+        logger.debug("Found existing queue")
     except ValueError:
         # create actors
         logger.debug("Creating new actors")
         queue_handle = Queue(actor_options={"name": queue_name, "lifetime": "detached"})
         actors = _create_ray_actors(queue_handle)
 
-    # start gpu actors loop
-    for actor in actors:
-        actor.run.remote()
+        # start gpu actors loop
+        for actor in actors:
+            actor.run.remote()
 
     global QUEUE, ACTORS
     ACTORS = actors
@@ -167,7 +168,7 @@ async def are_actors_ready() -> bool:
         return len(ready) == _env.RAY_GPUS_CNT
 
     except Exception as e:
-        logger.debug(f"Readiness check failed: {e}")
+        logger.debug(f"Readiness check failed, workers not ready: {e}")
         return False
 
 

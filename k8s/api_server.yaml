@@ -15,7 +15,7 @@ spec:
         app: api-server
     spec:
       containers:
-        - image: l8bloom-frontier:5000/api_server:0.0.14
+        - image: l8bloom-frontier:5000/api_server:0.0.15
           name: api-server
           env:
             - name: RAY_HEAD_SVC
