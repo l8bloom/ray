@@ -28,8 +28,8 @@ spec:
             - name: RAY_HEAD_SVC
               value: "a"
             - name: RAY_HEAD_SVC_PORT
-              value: "a"
+              value: "0"
             - name: RAY_GPUS_CNT
-              value: "a"
+              value: "0"
             - name: X_API_KEY
               value: "a"
