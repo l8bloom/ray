@@ -8,16 +8,25 @@ import ray
 from ray.util.actor_pool import ActorPool
 from vllm import LLM
 
+from api_server.database.db import get_db
+
 from .env import get_env
 
 _env = get_env()
 
 logger = logging.getLogger(__name__)
 
-# for some reason ray images use default python installation
-# even though PATH was extended with venv python
+
 runtime_env = {
     "env_vars": {
+        "PG_USER": _env.PG_USER,
+        "PG_PASSWORD": _env.PG_PASSWORD,
+        "PG_HOST": _env.PG_HOST,
+        "PG_PORT": str(_env.PG_PORT),
+        "PG_DATABASE": _env.PG_DATABASE,
+        "PG_DRIVER_NAME": _env.PG_DRIVER_NAME,
+        # for some reason ray images use default python installation
+        # even though PATH was extended with venv python
         "PATH": "/.venv/bin:${PATH}",
     }
 }
@@ -33,6 +42,7 @@ class LLMActor:
     def __init__(self, model_path: str):
         self._ready = False
         self.llm = LLM(model=model_path)
+        self.db = get_db(get_env())
         self._ready = True
 
     def batch_generate(self, prompts: list[str], max_tokens: int):

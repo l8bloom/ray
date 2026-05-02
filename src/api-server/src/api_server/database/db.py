@@ -39,7 +39,7 @@ class Database:
     @classmethod
     def create(cls, db_cfg: DatabaseConfig | None = None) -> "Database":
         """Creates new instance of Database if not created already."""
-        db_cfg = db_cfg or DatabaseConfig()
+        db_cfg = db_cfg
         conn_info = cls.db_conn_info(db_cfg).render_as_string()
         db = cls._databases.get(conn_info)
         if db is None:
