@@ -30,7 +30,7 @@ build_and_push() {
 			image_tag="ray:0.0.3"
 			;;
 		server)
-			image_tag="api_server:0.0.7"
+			image_tag="api_server:0.0.8"
 			;;
 		*)
 			echo "Unknown mode: $mode"

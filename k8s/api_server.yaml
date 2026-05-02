@@ -15,7 +15,7 @@ spec:
         app: api-server
     spec:
       containers:
-        - image: l8bloom-frontier:5000/api_server:0.0.7
+        - image: l8bloom-frontier:5000/api_server:0.0.8
           name: api-server
           env:
             - name: RAY_HEAD_SVC
@@ -50,8 +50,8 @@ spec:
             httpGet:
               path: "/ready"
               port: server-port
-            # try with 60 sec
-            failureThreshold: 30
+            # try with 120 sec
+            failureThreshold: 60
             periodSeconds: 2
             timeoutSeconds: 2
           livenessProbe:

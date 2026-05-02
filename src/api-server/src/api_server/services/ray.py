@@ -1,6 +1,5 @@
 """Ray API"""
 
-import asyncio
 import logging
 import uuid
 
@@ -44,11 +43,11 @@ class LLMActor:
     Used for readiness checks.
     """
 
-    def __init__(self, model_path: str):
-        self._ready = False
+    def __init__(self, model_path: str, queue: Queue):
+        self.queue = queue
         self.llm = LLM(model=model_path)
         self.db = get_db(get_env())
-        self._ready = True
+        self.say_ready()
 
     def run(self, queue: Queue):
         """Beginning and end of the actor's lifetime."""
@@ -70,8 +69,9 @@ class LLMActor:
 
         # TODO: save here in the database
 
-    def is_ready(self) -> bool:
-        return self._ready
+    def say_ready(self) -> bool:
+        """Update the queue indicating to the cluster this actor is ready."""
+        self.queue.put_nowait(True)
 
 
 def _init_ray():
@@ -84,7 +84,7 @@ def _init_ray():
     logger.info("Connected to Ray cluster.")
 
 
-def _create_ray_actor(name: str, namespace: str):
+def _create_ray_actor(name: str, namespace: str, queue: Queue):
     llm_handle = LLMActor.options(
         name=name,
         lifetime="detached",
@@ -92,12 +92,12 @@ def _create_ray_actor(name: str, namespace: str):
         # hardcoded for Qwen model
         num_gpus=1,
         num_cpus=4,
-    ).remote(_env.QWEN_PATH)
+    ).remote(_env.QWEN_PATH, queue)
 
     return llm_handle
 
 
-def _create_ray_actors():
+def _create_ray_actors(queue: Queue):
     actors = [
         _create_ray_actor(f"{_env.RAY_ACTOR_BASENAME}_{i + 1}", _env.RAY_NAMESPACE)
         for i in range(_env.RAY_GPUS_CNT)
@@ -118,8 +118,8 @@ def _get_ray_actors():
     return actors
 
 
-ACTORS = None
-QUEUE = None
+ACTORS: list[LLMActor] | None = None
+QUEUE: Queue | None = None
 
 
 def create_actors():
@@ -133,7 +133,11 @@ def create_actors():
     except ValueError:
         # create actors
         queue_handle = Queue(actor_options={"name": queue_name, "lifetime": "detached"})
-        actors = _create_ray_actors()
+        actors = _create_ray_actors(queue_handle)
+
+    # mark actors ready
+    for actor in actors:
+        actor.say_ready.remote()
 
     # start gpu actors loop
     for actor in actors:
@@ -144,19 +148,18 @@ def create_actors():
     QUEUE = queue_handle
 
 
+QUEUE_READINESS = []
+
+
 async def are_actors_ready() -> bool:
     """Returns True if Ray initialized the workers."""
-    if not ACTORS:
+    if not ACTORS or len(ACTORS) != _env.RAY_GPUS_CNT:
         return False
 
     try:
-        actor_handle = ACTORS[0]
-
-        ready_ref = actor_handle.is_ready.remote()
-        result = await asyncio.wait_for(ready_ref, timeout=1.0)
-
-        return result
-
+        item = QUEUE.get(timeout=1.0)
+        QUEUE_READINESS.append(item)
+        return len(QUEUE_READINESS) == _env.RAY_GPUS_CNT
     except (TimeoutError, Exception) as e:
         logger.debug(f"Readiness check failed: {e}")
         return False
