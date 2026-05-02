@@ -2,6 +2,7 @@
 
 import logging
 import uuid
+from functools import lru_cache
 
 import ray
 from ray.util.queue import Queue
@@ -72,6 +73,10 @@ class LLMActor:
         """Indicate to the cluster this actor is ready."""
         return True
 
+    def get_queue(self) -> Queue:
+        # sort of a hack for Queue vs ClientActorHandle
+        return self.queue
+
 
 def _init_ray():
     logger.info("Connecting to Ray cluster...")
@@ -132,10 +137,12 @@ def create_actors():
     _init_ray()
     queue_name = "queue"
     try:
-        queue_handle = ray.get_actor(name=queue_name, namespace=_env.RAY_NAMESPACE)
         actors = _get_ray_actors()
+        queue_handle = ray.get(actors[0].get_queue.remote())
+        logger.debug("Found existing actors")
     except ValueError:
         # create actors
+        logger.debug("Creating new actors")
         queue_handle = Queue(actor_options={"name": queue_name, "lifetime": "detached"})
         actors = _create_ray_actors(queue_handle)
 
@@ -164,5 +171,6 @@ async def are_actors_ready() -> bool:
         return False
 
 
+@lru_cache(maxsize=1)
 def get_shared_queue() -> Queue:
     return QUEUE
