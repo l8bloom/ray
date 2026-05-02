@@ -9,8 +9,9 @@ from api_server.contracts.server.incoming import Batch
 from api_server.contracts.services.inference import InferenceRepo, get_inference_service
 from api_server.exception_handlers import register_all_handlers
 from api_server.exceptions import NotAuthenticated
-from api_server.services.di import api_key_header, is_app_ready, shared_queue
+from api_server.services.di import api_key_header, is_app_ready
 from api_server.services.env import AppEnv, get_env
+from api_server.services.ray import get_shared_queue
 
 app = FastAPI(lifespan=lifespan)
 register_all_handlers(app)
@@ -36,7 +37,7 @@ def batch_inference(
     batch: Batch,
     env: Annotated[AppEnv, Depends(get_env)],
     api_key: Annotated[str, Depends(api_key_header)],
-    ray_queue: Annotated[Queue, Depends(shared_queue)],
+    ray_queue: Annotated[Queue, Depends(get_shared_queue)],
     repo: Annotated[InferenceRepo, Depends(get_inference_service)],
 ):
     if api_key != env.X_API_KEY:

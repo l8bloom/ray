@@ -164,6 +164,5 @@ async def are_actors_ready() -> bool:
         return False
 
 
-def get_queue() -> Queue:
-    global QUEUE
+def get_shared_queue() -> Queue:
     return QUEUE
