@@ -64,7 +64,9 @@ class LLMActor:
         outputs = self.llm.generate(prompts, params)
         print(outputs)
 
-        # TODO: save here in the database
+        print("Saving results to the database...")
+        self.db.save_inference_result(batch_id=job_id, inference_outputs=outputs)
+        print("Results saved.")
 
     def say_ready(self) -> bool:
         """Indicate to the cluster this actor is ready."""
