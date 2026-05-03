@@ -27,10 +27,10 @@ build_and_push() {
 
 	case "$mode" in
 		ray)
-			image_tag="ray:0.0.5"
+			image_tag="ray:0.0.6"
 			;;
 		server)
-			image_tag="api_server:0.0.17"
+			image_tag="api_server:0.0.18"
 			;;
 		*)
 			echo "Unknown mode: $mode"

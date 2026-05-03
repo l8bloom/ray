@@ -73,15 +73,15 @@ class Database:
             batch_prompts = []
             for prompt_res in inference_outputs:
                 # take the 1st?
-                completion = prompt_res["outputs"][0]
+                completion = prompt_res.outputs[0]
 
                 bp = BatchPrompt(
                     batch_id=batch_id,
-                    prompt=prompt_res["prompt"],
-                    in_tokens_cnt=len(prompt_res["prompt_token_ids"]),
-                    answer=completion["text"],
-                    out_tokens_cnt=len(completion["token_ids"]),
-                    finish_reason=completion["finish_reason"],
+                    prompt=prompt_res.prompt,
+                    in_tokens_cnt=len(prompt_res.prompt_token_ids),
+                    answer=completion.text,
+                    out_tokens_cnt=len(completion.token_ids),
+                    finish_reason=completion.finish_reason,
                 )
                 batch_prompts.append(bp)
 
