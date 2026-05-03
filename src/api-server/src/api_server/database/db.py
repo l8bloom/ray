@@ -1,10 +1,14 @@
+import uuid
+
 from pydantic import BaseModel
 from sqlalchemy import URL, create_engine, text
 from sqlalchemy.orm import sessionmaker
 
+from api_server.contracts.services.incoming import BatchJobStatus
 from api_server.services.env import AppEnv
+from api_server.services.time import utc_datetime
 
-from .orm_models import Batch as BatchORM
+from .orm_models import Batch, BatchPrompt
 
 
 class DatabaseConfig(BaseModel):
@@ -63,10 +67,35 @@ class Database:
             database=db_cfg.DATABASE_NAME,
         )
 
-    def create_new_batch(self, batch: BatchORM):
-        """Records new batch job and its prompts."""
+    def save_inference_result(self, batch_id: uuid.UUID, inference_outputs):
+        """Saves all prompt outputs."""
+        with self.session_factory() as session:
+            batch_prompts = []
+            for prompt_res in inference_outputs:
+                # take the 1st?
+                completion = prompt_res["outputs"][0]
 
-        BatchORM()
+                bp = BatchPrompt(
+                    batch_id=batch_id,
+                    prompt=prompt_res["prompt"],
+                    in_tokens_cnt=len(prompt_res["prompt_token_ids"]),
+                    answer=completion["text"],
+                    out_tokens_cnt=len(completion["token_ids"]),
+                    finish_reason=completion["finish_reason"],
+                )
+                batch_prompts.append(bp)
+
+            session.add_all(batch_prompts)
+
+            # update batch job
+            session.query(Batch).filter(Batch.id == batch_id).update(
+                {
+                    "status": BatchJobStatus.COMPLETE,
+                    "finished_at": utc_datetime(),
+                }
+            )
+
+            session.commit()
 
 
 def get_db(env: AppEnv) -> Database:

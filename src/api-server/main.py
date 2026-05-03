@@ -7,6 +7,7 @@ from ray.util.queue import Queue
 from api_server.app_lifespan import lifespan
 from api_server.contracts.server.incoming import Batch
 from api_server.contracts.services.inference import InferenceRepo, get_inference_service
+from api_server.database.db import get_db
 from api_server.exception_handlers import register_all_handlers
 from api_server.exceptions import NotAuthenticated
 from api_server.services.di import api_key_header, is_app_ready, shared_queue
@@ -47,3 +48,11 @@ def batch_inference(
     ray_queue.put((batch.prompts, batch.max_tokens, job_id))
 
     return job_id
+
+
+@app.get("/test_saving/{batch_id}")
+def test_saving(batch_id):
+    db = get_db(get_env())
+    from api_server.database.test_input import res
+
+    db.save_inference_result(batch_id, res)

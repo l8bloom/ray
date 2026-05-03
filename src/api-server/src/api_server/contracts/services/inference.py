@@ -1,5 +1,4 @@
 import uuid
-from enum import StrEnum
 from typing import Annotated
 
 from pydantic import BaseModel, Field
@@ -9,13 +8,7 @@ from api_server.database.db import get_db
 from api_server.database.orm_models import Batch as BatchORM
 from api_server.services.env import get_env
 
-
-class BatchJobStatus(StrEnum):
-    PENDING = "PENDING"
-    QUEUED = "QUEUED"
-    RUNNING = "RUNNING"
-    FAILED = "FAILED"
-    COMPLETE = "COMPLETED"
+from .incoming import BatchJobStatus
 
 
 class _Batch(BaseModel):

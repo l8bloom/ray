@@ -39,10 +39,7 @@ runtime_env = {
 
 @ray.remote
 class LLMActor:
-    """A thin wrapper around vllm LLM.
-
-    Used for readiness checks.
-    """
+    """A thin wrapper around vllm LLM."""
 
     def __init__(self, model_path: str, queue: Queue):
         self.queue = queue
@@ -58,12 +55,12 @@ class LLMActor:
     def batch_generate(self, prompts: list[str], max_tokens: int, job_id: uuid.UUID):
         """Batch inference."""
 
+        print(f"JOB ID: {job_id}")
         params = self.llm.get_default_sampling_params()
         # override max tokens and keep the defaults
         # ideally the entire sampler params will be the arg, not only tokens
         # but out of scope
         params.max_tokens = max_tokens
-        print(f"JOB ID: {job_id}")
         outputs = self.llm.generate(prompts, params)
         print(outputs)
 
