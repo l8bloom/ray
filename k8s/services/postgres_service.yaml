@@ -20,6 +20,7 @@ spec:
   ports:
     - port: 7777
       targetPort: pg-port
+      nodePort: 30406 # keep it fixed
 ---
 apiVersion: v1
 kind: Service
