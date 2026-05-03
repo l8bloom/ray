@@ -36,8 +36,7 @@ spec:
     - groupName: workergroup
       replicas: 1
       minReplicas: 1
-      maxReplicas: 1
-      numOfHosts: 1
+      maxReplicas: 2
       template:
         metadata:
           labels:
