@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, status
@@ -7,7 +8,6 @@ from ray.util.queue import Queue
 from api_server.app_lifespan import lifespan
 from api_server.contracts.server.incoming import Batch
 from api_server.contracts.services.inference import InferenceRepo, get_inference_service
-from api_server.database.db import get_db
 from api_server.exception_handlers import register_all_handlers
 from api_server.exceptions import NotAuthenticated
 from api_server.services.di import api_key_header, is_app_ready, shared_queue
@@ -51,9 +51,14 @@ def batch_inference(
     return job_id
 
 
-@app.get("/test_saving/{batch_id}")
-def test_saving(batch_id):
-    db = get_db(get_env())
-    from api_server.database.test_input import res
+@app.get("/v1/batches/{batch_id}")
+def batch_inference_status(
+    batch_id: uuid.UUID,
+    env: Annotated[AppEnv, Depends(get_env)],
+    api_key: Annotated[str, Depends(api_key_header)],
+    repo: Annotated[InferenceRepo, Depends(get_inference_service)],
+):
+    if api_key != env.X_API_KEY:
+        raise NotAuthenticated("Missing or invalid API key.")
 
-    db.save_inference_result(batch_id, res)
+    return repo.get_batch_results(batch_id=batch_id)

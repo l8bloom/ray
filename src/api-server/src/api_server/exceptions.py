@@ -7,3 +7,7 @@ class BaseException(Exception):
 
 class NotAuthenticated(BaseException):
     """Invalid or missing API Key."""
+
+
+class BatchNotFound(BaseException):
+    """Batch not registered in the system."""

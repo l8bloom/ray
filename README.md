@@ -37,7 +37,7 @@ Three images in total are required:
 - Api server
 
 `docker/build.sh` explains and automates how to build them.  
-Note that the cluster's CRI will pull images from a local registry `l8bloom-frontier', please replace it with the registry you are using. 
+Note that the cluster's CRI will pull images from a local registry `l8bloom-frontier`, please replace it with the registry you are using. 
 
 
 #### Deploy resources
@@ -73,9 +73,9 @@ Now the UI can be rendered in a broswer(e.g. `http://192.168.1.100:8265/#/cluste
 ### 2. Infrastructure Components Explanation
 *   **KubeRay Operator:** Orchestrates the lifecycle of the Ray head and worker nodes.
 *   **RayCluster:** Services for distributing computation tasks across the cluster.
-*   **AMD Device Plugin:** Exposes Radeon GPUs to the Kubernetes scheduler.
-*   **Local Path Provisioner:** Provides CSI solution for PVC. The database data is kept on a node even if whole cluster is removed.
-*   **Python uvicorn Driver:** Acts as the entry point for submitting asynchronous batch jobs.
+*   **AMD Device Plugin:** Exposes AMD GPUs to the Kubernetes scheduler.
+*   **Local Path Provisioner:** Provides CSI solution for the cluster. The database data is kept on a node even if the whole cluster is removed.
+*   **Python uvicorn driver:** Acts as the entry point for submitting asynchronous batch jobs.
 
 
 ## Usage
@@ -83,7 +83,7 @@ Now the UI can be rendered in a broswer(e.g. `http://192.168.1.100:8265/#/cluste
 ### API Specification
 The platform accepts JSON batches. It automatically maps requests to the **ChatML** format and persists metrics to the database.
 
-`api-server` is a `NodePort` service which exposes the API for offline batching on the `31313`, port accessible from any node in your k8s cluster.
+`api-server` is a `NodePort` service which exposes the API for offline batching on the `31313` port, accessible from any node in your k8s cluster.
 
 **Submit a Batch Job:**
 ```bash

@@ -17,7 +17,7 @@ spec:
       spec:
         containers:
           - name: ray-head
-            image: l8bloom-frontier:5000/ray:0.0.8
+            image: l8bloom-frontier:5000/ray:0.0.9
             imagePullPolicy: IfNotPresent
             volumeMounts:
               - mountPath: /tmp/ray
@@ -44,7 +44,7 @@ spec:
         spec:
           containers:
             - name: ray-worker
-              image: l8bloom-frontier:5000/ray:0.0.8
+              image: l8bloom-frontier:5000/ray:0.0.9
               imagePullPolicy: IfNotPresent
               volumeMounts:
                 - mountPath: /tmp/ray
