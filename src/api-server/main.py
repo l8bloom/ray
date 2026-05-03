@@ -43,6 +43,7 @@ def batch_inference(
     if api_key != env.X_API_KEY:
         raise NotAuthenticated("Missing or invalid API key.")
 
+    print(batch.prompts)
     job_id = repo.create_inference_batch(batch)
 
     ray_queue.put((batch.prompts, batch.max_tokens, job_id))

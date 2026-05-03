@@ -2,6 +2,14 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
+chatML = """
+<|im_start|>system
+You are a helpful assistant.<|im_end|>
+<|im_start|>user
+{}<|im_end|>
+<|im_start|>assistant
+"""
+
 
 # TODO: think about limits
 class BatchPrompt(BaseModel):
@@ -44,5 +52,5 @@ class Batch(BaseModel):
 
     @property
     def prompts(self):
-        """Extracts prompts."""
-        return [p.prompt for p in self.input]
+        """Extracts prompts and adjust for Qwen chat template style."""
+        return [chatML.format(p.prompt) for p in self.input]
