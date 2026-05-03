@@ -1,6 +1,7 @@
 """Ray API"""
 
 import logging
+import time
 import uuid
 from functools import lru_cache
 
@@ -61,11 +62,17 @@ class LLMActor:
         # ideally the entire sampler params will be the arg, not only tokens
         # but out of scope
         params.max_tokens = max_tokens
+        st_time = time.time()
         outputs = self.llm.generate(prompts, params)
+        duration_ms = (time.time() - st_time) * 1_000
         print(outputs)
 
         print("Saving results to the database...")
-        self.db.save_inference_result(batch_id=job_id, inference_outputs=outputs)
+        self.db.save_inference_result(
+            batch_id=job_id,
+            inference_outputs=outputs,
+            inference_time_ms=duration_ms,
+        )
         print("Results saved.")
 
     def say_ready(self) -> bool:

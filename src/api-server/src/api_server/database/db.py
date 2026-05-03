@@ -67,31 +67,52 @@ class Database:
             database=db_cfg.DATABASE_NAME,
         )
 
-    def save_inference_result(self, batch_id: uuid.UUID, inference_outputs):
-        """Saves all prompt outputs."""
+    def save_inference_result(
+        self,
+        batch_id: uuid.UUID,
+        inference_outputs,
+        inference_time_ms: float,
+    ):
+        """Saves inference outputs and associated metrics."""
         with self.session_factory() as session:
             batch_prompts = []
+            total_in = 0
+            total_out = 0
+
             for prompt_res in inference_outputs:
-                # take the 1st?
                 completion = prompt_res.outputs[0]
+                in_cnt = len(prompt_res.prompt_token_ids)
+                out_cnt = len(completion.token_ids)
+
+                total_in += in_cnt
+                total_out += out_cnt
 
                 bp = BatchPrompt(
                     batch_id=batch_id,
                     prompt=prompt_res.prompt,
-                    in_tokens_cnt=len(prompt_res.prompt_token_ids),
+                    in_tokens_cnt=in_cnt,
                     answer=completion.text,
-                    out_tokens_cnt=len(completion.token_ids),
+                    out_tokens_cnt=out_cnt,
                     finish_reason=completion.finish_reason,
                 )
                 batch_prompts.append(bp)
 
             session.add_all(batch_prompts)
 
-            # update batch job
+            # for precision use tokens / milisecond
+            tokens_per_ms = (
+                total_out / inference_time_ms if inference_time_ms > 0 else 0
+            )
+            tps = tokens_per_ms * 1_000
+
+            # Update batch job
             session.query(Batch).filter(Batch.id == batch_id).update(
                 {
                     "status": BatchJobStatus.COMPLETE,
                     "finished_at": utc_datetime(),
+                    "total_in_tokens": total_in,
+                    "total_out_tokens": total_out,
+                    "tokens_per_second": tps,
                 }
             )
 
